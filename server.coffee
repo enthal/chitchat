@@ -2,13 +2,17 @@
 
 fs   = require 'fs'
 http = require 'http'
-io   = require('socket.io').listen(1338)
+io   = require('socket.io').listen(1338).set('log level', 1)
+
+messages = []
 
 io.sockets.on 'connection', (socket) ->
 
-  socket.emit 'news', hello: 'world'
-
-  socket.on 'my other event', (data) -> console.log data
+  socket.emit 'messages', messages
+  socket.on 'message', (message) ->
+    console.log message
+    messages.push message
+    socket.emit 'message', message
 
 
 http.createServer( (req, res) ->

@@ -3,10 +3,16 @@
 <script src='http://coffeescript.org/extras/coffee-script.js'></script>
 
 <script type='text/coffeescript'>
+
   socket = io.connect ':1338'
-  socket.on 'news', (data) ->
-    console.log data
-    socket.emit 'my other event', my: 'data'
+
+  socket.on 'messages', (messages) ->
+    console.log 'messages:', messages
+    socket.emit 'message', 'i am a message'
+
+  socket.on 'message', (message) ->
+    console.log 'message:', message
+
 </script>
 
 Go.
