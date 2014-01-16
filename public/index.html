@@ -1,11 +1,12 @@
-<script src="https://s3-us-west-2.amazonaws.com/change-ds-tj/socket.io/socket.io.js"></script>
-<script>
-  var socket = io.connect(':1338');
-  ws = socket
-  socket.on('news', function (data) {
-    console.log(data);
-    socket.emit('my other event', { my: 'data' });
-  });
+<script src='https://s3-us-west-2.amazonaws.com/change-ds-tj/socket.io/socket.io.js'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js'></script>
+<script src='http://coffeescript.org/extras/coffee-script.js'></script>
+
+<script type='text/coffeescript'>
+  socket = io.connect ':1338'
+  socket.on 'news', (data) ->
+    console.log data
+    socket.emit 'my other event', my: 'data'
 </script>
 
 Go.
