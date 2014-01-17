@@ -13,6 +13,7 @@
   },
 
   "dependencies": {
-     "socket.io": "0.9.16"
+    "coffee-script": "~1.6",
+    "socket.io": "0.9.16"
   }
 }
