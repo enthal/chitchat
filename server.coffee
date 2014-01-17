@@ -7,12 +7,14 @@ io   = require('socket.io').listen(1338).set('log level', 1)
 messages = []
 
 io.sockets.on 'connection', (socket) ->
+  console.log 'connection!', socket.id
 
   socket.emit 'messages', messages
+
   socket.on 'message', (message) ->
     console.log message
     messages.push message
-    socket.emit 'message', message
+    io.sockets.emit 'message', message
 
 
 http.createServer( (req, res) ->

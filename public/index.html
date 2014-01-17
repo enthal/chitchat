@@ -3,7 +3,6 @@
 <script src='https://s3-us-west-2.amazonaws.com/change-ds-tj/socket.io/socket.io.js'></script>
 
 <script type='text/coffeescript'>
-
   socket = io.connect ':1338'
   messages = []
 
@@ -11,17 +10,19 @@
 
   .run( ($rootScope) ->
     socket.on 'messages', (new_messages) ->
-      console.log 'messages:', new_messages
       $rootScope.$apply ->
-        messages.push m for m in new_messages
-      socket.emit 'message', body:'i am a message'
+        messages.push m  for m in new_messages
 
     socket.on 'message', (message) ->
-      console.log 'message:', message
-      messages.push message
+      $rootScope.$apply ->
+        messages.push message
   )
-  .controller('ChitChat', ($scope) ->
+  .controller('ChitChat', ($scope, $log) ->
     $scope.messages = messages
+    $scope.sendMessage = ->
+      return unless $scope.messageText
+      socket.emit 'message', body:$scope.messageText
+      $scope.messageText = ''
   )
 
 </script>
@@ -31,6 +32,11 @@
   <h1>chitchat</h1>
 
   <div ng-controller='ChitChat'>
+    <form ng-submit="sendMessage()">
+      <input type="text" ng-model="messageText" placeholder="your message">
+      <input type="submit" value="send">
+    </form>
+
     <label>{{messages.length}} messages</label>
     <ul>
       <li ng-repeat='message in messages'>{{message.body}}</li>
