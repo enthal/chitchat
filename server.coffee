@@ -3,25 +3,31 @@
 CHATS_FILENAME = '/tmp/chats.json'
 
 fs   = require 'fs'
-io   = require('socket.io').listen(1338).set('log level', 1)
 
-messages = try
-  JSON.parse fs.readFileSync CHATS_FILENAME
-catch e
-  []
-console.log "starting with #{messages.length} messages"
 
-io.sockets.on 'connection', (socket) ->
-  console.log 'connection!', socket.id
+# socket.io service
+do ->
+  io   = require('socket.io').listen(1338).set('log level', 1)
 
-  socket.emit 'messages', messages
+  messages = try
+    JSON.parse fs.readFileSync CHATS_FILENAME
+  catch e
+    []
+  console.log "starting with #{messages.length} messages"
 
-  socket.on 'message', (message) ->
-    console.log message
-    messages.push message
-    io.sockets.emit 'message', message
-    fs.writeFile CHATS_FILENAME, JSON.stringify(messages, null, 2)
+  io.sockets.on 'connection', (socket) ->
+    console.log 'connection!', socket.id
 
+    socket.emit 'messages', messages
+
+    socket.on 'message', (message) ->
+      console.log message
+      messages.push message
+      io.sockets.emit 'message', message
+      fs.writeFile CHATS_FILENAME, JSON.stringify(messages, null, 2)
+
+
+# http service
 do ->
   http = require 'http'
   url  = require 'url'
