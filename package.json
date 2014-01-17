@@ -1,0 +1,18 @@
+{
+  "name": "chitchat",
+  "description": "A simple chat server made with angularjs, socket.io, coffeescript, nodejs, redis, and love.",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/enthal/chitchat"
+  },
+
+  "engines": {
+    "node": "v0.10.x",
+    "npm": "1.3.x"
+  },
+
+  "dependencies": {
+     "socket.io": "0.9.16"
+  }
+}
