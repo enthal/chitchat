@@ -9,14 +9,18 @@
   angular.module('chitchat', [])
 
   .run( ($rootScope) ->
-    socket.on 'messages', (new_messages) ->
+    socket
+    .on('connect',    -> $rootScope.$apply -> $rootScope.isConnected = true)
+    .on('disconnect', -> $rootScope.$apply -> $rootScope.isConnected = false)
+    .on('messages', (new_messages) ->
       $rootScope.$apply ->
         messages.length = 0
         messages.push m  for m in new_messages
-
-    socket.on 'message', (message) ->
+    )
+    .on('message', (message) ->
       $rootScope.$apply ->
         messages.push message
+    )
   )
   .controller('ChitChat', ($scope, $log) ->
     $scope.messages = messages
@@ -33,6 +37,9 @@
   <h1>chitchat</h1>
 
   <div ng-controller='ChitChat'>
+    <div ng-if=" isConnected">:-) connected</div>
+    <div ng-if="!isConnected">:-( disconnected</div>
+
     <form ng-submit="sendMessage()">
       <input type="text" ng-model="messageText" placeholder="your message">
       <input type="submit" value="send">
