@@ -34,16 +34,18 @@ do ->
   http.createServer( (req, res) ->
     path = url.parse(req.url).pathname
     path += 'index.html'  if /\/$/.test path
-    contentType = CONTENT_TYPES_BY_EXTENSION[(path.match(/\.(\w+)$/) or ['txt'])[1]]
-    fs.readFile "public/#{path}", (err, data) ->
-      status = 200
-      if err
-        status = 404
-        contentType = 'text/plain'
-        data = "#{status}: #{path} ; Error #{err}"
+
+    respond = (status, contentType, data) ->
       console.log req.method, status, path, contentType
       res.writeHead status, 'Content-Type': contentType
       res.end data
+
+    fs.readFile "public/#{path}", (err, data) ->
+      if err
+        respond 404, 'text/plain', "404: #{path} ; Error #{err}"
+      else
+        contentType = CONTENT_TYPES_BY_EXTENSION[(path.match(/\.(\w+)$/) or ['txt'])[1]]
+        respond 200, contentType, data
 
   ).listen 1337, '127.0.0.1'
 
