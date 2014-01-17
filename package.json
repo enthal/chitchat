@@ -1,6 +1,6 @@
 {
   "name": "chitchat",
-  "description": "A simple chat server made with angularjs, socket.io, coffeescript, nodejs, redis, and love.",
+  "description": "A simple chat server made with angularjs, socket.io, coffeescript, nodejs, redis, and ॐ.",
   "version": "0.0.1",
   "repository": {
     "type": "git",
