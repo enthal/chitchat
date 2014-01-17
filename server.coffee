@@ -1,10 +1,16 @@
 #!/usr/bin/env coffee
 
+CHATS_FILENAME = '/tmp/chats.json'
+
 fs   = require 'fs'
 http = require 'http'
 io   = require('socket.io').listen(1338).set('log level', 1)
 
-messages = []
+messages = try
+  JSON.parse fs.readFileSync CHATS_FILENAME
+catch e
+  []
+console.log "starting with #{messages.length} messages"
 
 io.sockets.on 'connection', (socket) ->
   console.log 'connection!', socket.id
@@ -15,6 +21,7 @@ io.sockets.on 'connection', (socket) ->
     console.log message
     messages.push message
     io.sockets.emit 'message', message
+    fs.writeFile CHATS_FILENAME, JSON.stringify(messages, null, 2)
 
 
 http.createServer( (req, res) ->

@@ -11,6 +11,7 @@
   .run( ($rootScope) ->
     socket.on 'messages', (new_messages) ->
       $rootScope.$apply ->
+        messages.length = 0
         messages.push m  for m in new_messages
 
     socket.on 'message', (message) ->
