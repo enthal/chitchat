@@ -1,18 +1,45 @@
-<script src='https://s3-us-west-2.amazonaws.com/change-ds-tj/socket.io/socket.io.js'></script>
-<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js'></script>
 <script src='http://coffeescript.org/extras/coffee-script.js'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.js'></script>
+<script src='https://s3-us-west-2.amazonaws.com/change-ds-tj/socket.io/socket.io.js'></script>
 
 <script type='text/coffeescript'>
 
   socket = io.connect ':1338'
+  messages = []
 
-  socket.on 'messages', (messages) ->
-    console.log 'messages:', messages
-    socket.emit 'message', 'i am a message'
+  angular.module('chitchat', [])
 
-  socket.on 'message', (message) ->
-    console.log 'message:', message
+  .run( ($rootScope) ->
+    socket.on 'messages', (new_messages) ->
+      console.log 'messages:', new_messages
+      $rootScope.$apply ->
+        messages.push m for m in new_messages
+      socket.emit 'message', body:'i am a message'
+
+    socket.on 'message', (message) ->
+      console.log 'message:', message
+      messages.push message
+  )
+  .controller('ChitChat', ($scope) ->
+    $scope.messages = messages
+  )
 
 </script>
 
-Go.
+<body ng-app='chitchat'>
+
+  <h1>chitchat</h1>
+
+  <div ng-controller='ChitChat'>
+    <label>{{messages.length}} messages</label>
+    <ul>
+      <li ng-repeat='message in messages'>{{message.body}}</li>
+    </ul>
+  </div>
+
+</body>
+
+
+<!-- allow coffeescript to convert before angular bootstraps -->
+<script type='text/coffeescript'> angular.resumeBootstrap() </script>
+<script> window.name = 'NG_DEFER_BOOTSTRAP!'</script>
