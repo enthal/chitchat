@@ -3,7 +3,6 @@
 CHATS_FILENAME = '/tmp/chats.json'
 
 fs   = require 'fs'
-http = require 'http'
 io   = require('socket.io').listen(1338).set('log level', 1)
 
 messages = try
@@ -23,15 +22,30 @@ io.sockets.on 'connection', (socket) ->
     io.sockets.emit 'message', message
     fs.writeFile CHATS_FILENAME, JSON.stringify(messages, null, 2)
 
+do ->
+  http = require 'http'
+  url  = require 'url'
 
-http.createServer( (req, res) ->
+  CONTENT_TYPES_BY_EXTENSION =
+    txt:    'text/plain'
+    html:   'text/html'
+    coffee: 'text/coffeescript'
 
-  res.writeHead 200, 'Content-Type': 'text/html'
-  fs.readFile 'public/index.html', (err, data) ->
-    throw err  if err
-    res.end data
+  http.createServer( (req, res) ->
+    path = url.parse(req.url).pathname
+    path += 'index.html'  if /\/$/.test path
+    contentType = CONTENT_TYPES_BY_EXTENSION[(path.match(/\.(\w+)$/) or ['txt'])[1]]
+    fs.readFile "public/#{path}", (err, data) ->
+      status = 200
+      if err
+        status = 404
+        contentType = 'text/plain'
+        data = "#{status}: #{path} ; Error #{err}"
+      console.log req.method, status, path, contentType
+      res.writeHead status, 'Content-Type': contentType
+      res.end data
 
-).listen 1337, '127.0.0.1'
+  ).listen 1337, '127.0.0.1'
 
-console.log 'Server running at http://127.0.0.1:1337/'
+  console.log 'Server running at http://127.0.0.1:1337/'
 
