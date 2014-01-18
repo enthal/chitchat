@@ -8,19 +8,25 @@
 
   <h1>chitchat</h1>
 
-  <div ng-controller='ChitChat'>
+  <div ng-controller='ChitChat' ng-cloak>
+
     <div ng-if=" isConnected">:-) connected</div>
     <div ng-if="!isConnected">:-( disconnected</div>
+
+    room: {{roomName}}
 
     <form ng-submit="sendMessage()">
       <input type="text" ng-model="messageText" placeholder="your message">
       <input type="submit" value="send">
     </form>
 
-    <label>{{messages.length}} messages</label>
-    <ul>
-      <li ng-repeat='message in messages'>{{message.body}}</li>
-    </ul>
+    <div ng-if='messages'>
+      <label>{{messages.length}} messages</label>
+      <ul>
+        <li ng-repeat='message in messages'>{{message.body}}</li>
+      </ul>
+    </div>
+
   </div>
 
 </body>
