@@ -19,7 +19,7 @@ angular.module('chitchat', [])
 )
 
 .controller('ChitChat', ($scope, $log, socketIo) ->
-  $scope.roomName = 'home'  # TODO
+  $scope.roomName = null
 
   $scope.getRoomNames = ->
     k for k of model.roomsByName

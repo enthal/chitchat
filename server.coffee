@@ -1,33 +1,43 @@
 #!/usr/bin/env coffee
 
 model = do ->
-  CHATS_FILENAME = '/tmp/room-chats.json'
-  fs   = require 'fs'
+  # redis schema:
+  #   chitchat:rooms = (SADD) set of room names
+  #   chitchat:room:<roomName> = (RPUSH) list of message body texts
 
-  roomsByName = try
-    JSON.parse fs.readFileSync CHATS_FILENAME
-  catch e
-    {}
+  redis = require("redis")
+  client = redis.createClient()
 
-  getRoomCount: -> (1 for _ of roomsByName).length
-  getAllRoomsWithMessages: -> roomsByName
+  withRoomCount: (fn) ->
+    client.scard 'chitchat:rooms', (e,x)->fn x
+
+  withAllRoomsWithMessages: (fn) ->
+    roomsByName = {}
+    client.smembers 'chitchat:rooms', (e, roomNames) ->
+      roomNames ?= []
+      left = roomNames.length
+      for roomName in roomNames
+        do (roomName) ->
+          client.lrange 'chitchat:room:'+roomName, 0, -1, (e, messages) ->
+            roomsByName[roomName] = messages: ((body:m) for m in messages)
+            fn roomsByName  unless --left
+
   acceptMessage: (message) ->
-    room = roomsByName[message.room] ?= name: message.room
-    messages = room.messages ?= []
-    messages.push message
-    fs.writeFile CHATS_FILENAME, JSON.stringify(roomsByName, null, 2)
+    client.sadd  'chitchat:rooms', message.room
+    client.rpush 'chitchat:room:'+ message.room, message.body
 
 
 # socket.io service
 do ->
   io   = require('socket.io').listen(1338).set('log level', 1)
 
-  console.log "starting with #{model.getRoomCount()} rooms"
+  model.withRoomCount (n) -> console.log "starting with #{n} rooms"
 
   io.sockets.on 'connection', (socket) ->
     console.log 'connection!', socket.id
 
-    socket.emit 'messages', model.getAllRoomsWithMessages()
+    model.withAllRoomsWithMessages (all) ->
+      socket.emit 'messages', all
 
     socket.on 'message', (message) ->
       console.log message
