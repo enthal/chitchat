@@ -31,32 +31,13 @@ do ->
       fs.writeFile CHATS_FILENAME, JSON.stringify(roomsByName, null, 2)
 
 
-# http service
+# express app http service
 do ->
-  http = require 'http'
-  url  = require 'url'
+  express = require 'express'
 
-  CONTENT_TYPES_BY_EXTENSION =
-    txt:    'text/plain'
-    html:   'text/html'
-    coffee: 'text/coffeescript'
-
-  http.createServer( (req, res) ->
-    path = url.parse(req.url).pathname
-    path += 'index.html'  if /\/$/.test path
-
-    respond = (status, contentType, data) ->
-      console.log status, req.method, path, contentType
-      res.writeHead status, 'Content-Type': contentType
-      res.end data
-
-    fs.readFile "public/#{path}", (err, data) ->
-      if err
-        respond 404, 'text/plain', "404: #{path} ; Error #{err}"
-      else
-        contentType = CONTENT_TYPES_BY_EXTENSION[(path.match(/\.(\w+)$/) or ['txt'])[1]]
-        respond 200, contentType, data
-
-  ).listen 1337, '127.0.0.1'
+  app = express()
+  app.use express.logger()
+  app.use express.static(__dirname + "/public")
+  app.listen 1337
 
   console.log 'Server running at http://127.0.0.1:1337/'
