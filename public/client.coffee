@@ -10,8 +10,6 @@ angular.module('chitchat', [])
   .on('messages', (roomsByName) ->
     console.log('roomsByName', roomsByName)
     model.roomsByName = roomsByName
-    $rootScope.roomNames = (k for k of model.roomsByName)
-    $rootScope.messages = model.roomsByName.home?.messages  # TODO
   )
   .on('message', (message) ->
     room = model.roomsByName[message.room] ?= name: message.room
@@ -23,15 +21,17 @@ angular.module('chitchat', [])
 .controller('ChitChat', ($scope, $log, socketIo) ->
   $scope.roomName = 'home'  # TODO
 
+  $scope.getRoomNames = ->
+    k for k of model.roomsByName
+  $scope.getMessagesInSelectedRoom = ->
+    model.roomsByName[$scope.roomName].messages
+
   $scope.sendMessage = ->
     return unless $scope.messageText
     socketIo.emit 'message',
       room: $scope.roomName,
       body: $scope.messageText
     $scope.messageText = ''
-
-  $scope.$watch (-> $scope.roomName),
-    (roomName) -> $scope.messages = model.roomsByName[roomName].messages
 )
 
 # socket.io wrapper: evaluate on() callback in $rootScope.$apply

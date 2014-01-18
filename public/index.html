@@ -13,17 +13,17 @@
     <div ng-if=" isConnected">:-) connected</div>
     <div ng-if="!isConnected">:-( disconnected</div>
 
-    room: <select ng-model="roomName" ng-options="x for x in roomNames"></select>
+    room: <select ng-model="roomName" ng-options="x for x in getRoomNames()"></select>
 
     <form ng-submit="sendMessage()">
       <input type="text" ng-model="messageText" placeholder="your message">
       <input type="submit" value="send">
     </form>
 
-    <div ng-if='messages'>
-      <label>{{messages.length}} messages</label>
+    <div ng-if='getMessagesInSelectedRoom()'>
+      <label>{{getMessagesInSelectedRoom().length}} messages</label>
       <ul>
-        <li ng-repeat='message in messages'>{{message.body}}</li>
+        <li ng-repeat='message in getMessagesInSelectedRoom()'>{{message.body}}</li>
       </ul>
     </div>
 
