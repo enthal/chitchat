@@ -1,5 +1,7 @@
 # chitchat
-A simple chat server made with angularjs, socket.io, coffeescript, nodejs, redis, and ॐ.
+A simple chat server made with angularjs, socket.io, coffeescript, nodejs, express, redis, and ॐ.
+
+Allows multiple (stateless) nodejs servers against a single redis instance.
 
 ## Up and running
 

@@ -9,6 +9,16 @@ model = do ->
   #   chitchat:room:<roomName> = (RPUSH) list of message body texts
 
   redis = require("redis")
+  onRedisMessage = null
+
+  do ->
+    clientPubSub = redis.createClient()
+    clientPubSub.on 'message', (channel, message) ->
+      console.log "message from redis subscription on channel [#{channel}] : #{message}"
+      return unless channel is 'chitchat:messages'
+      onRedisMessage JSON.parse message
+    clientPubSub.subscribe 'chitchat:messages'
+
   client = redis.createClient()
 
   withRoomCount: (fn) ->
@@ -28,6 +38,11 @@ model = do ->
   acceptMessage: (message) ->
     client.sadd  'chitchat:rooms', message.room
     client.rpush 'chitchat:room:'+ message.room, message.body
+    client.publish 'chitchat:messages', JSON.stringify message
+
+  onRedisMessage: (fn) ->
+    onRedisMessage = fn
+
 
 
 # socket.io service
@@ -45,7 +60,11 @@ do ->
     socket.on 'message', (message) ->
       console.log message
       model.acceptMessage message
-      io.sockets.emit 'message', message
+      # don't emit here; wait untl message moves through redis pubsub channel
+
+  model.onRedisMessage (message) ->
+    io.sockets.emit 'message', message
+
 
 
 # express app http service
