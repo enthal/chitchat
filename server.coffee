@@ -1,34 +1,38 @@
 #!/usr/bin/env coffee
 
-CHATS_FILENAME = '/tmp/room-chats.json'
+model = do ->
+  CHATS_FILENAME = '/tmp/room-chats.json'
+  fs   = require 'fs'
 
-fs   = require 'fs'
+  roomsByName = try
+    JSON.parse fs.readFileSync CHATS_FILENAME
+  catch e
+    {}
+
+  getRoomCount: -> (1 for _ of roomsByName).length
+  getAllRoomsWithMessages: -> roomsByName
+  acceptMessage: (message) ->
+    room = roomsByName[message.room] ?= name: message.room
+    messages = room.messages ?= []
+    messages.push message
+    fs.writeFile CHATS_FILENAME, JSON.stringify(roomsByName, null, 2)
 
 
 # socket.io service
 do ->
   io   = require('socket.io').listen(1338).set('log level', 1)
 
-  roomsByName = try
-    JSON.parse fs.readFileSync CHATS_FILENAME
-  catch e
-    {}
-  console.log "starting with #{(1 for _ of roomsByName).length} rooms"
+  console.log "starting with #{model.getRoomCount()} rooms"
 
   io.sockets.on 'connection', (socket) ->
     console.log 'connection!', socket.id
 
-    socket.emit 'messages', roomsByName
+    socket.emit 'messages', model.getAllRoomsWithMessages()
 
     socket.on 'message', (message) ->
       console.log message
-
-      room = roomsByName[message.room] ?= name: message.room
-      messages = room.messages ?= []
-      messages.push message
-
+      model.acceptMessage message
       io.sockets.emit 'message', message
-      fs.writeFile CHATS_FILENAME, JSON.stringify(roomsByName, null, 2)
 
 
 # express app http service
