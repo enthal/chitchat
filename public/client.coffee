@@ -23,8 +23,14 @@ angular.module('chitchat', [])
 
   $scope.getRoomNames = ->
     k for k of model.roomsByName
+
   $scope.getMessagesInSelectedRoom = ->
-    model.roomsByName[$scope.roomName].messages
+    model.roomsByName[$scope.roomName]?.messages
+
+  $scope.makeNewRoom = ->
+    name = $scope.newRoomNameText
+    console.log 'makeNewRoom', name
+    model.roomsByName[$scope.roomName = name] ?= name: name
 
   $scope.sendMessage = ->
     return unless $scope.messageText

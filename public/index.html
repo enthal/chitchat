@@ -13,18 +13,26 @@
     <div ng-if=" isConnected">:-) connected</div>
     <div ng-if="!isConnected">:-( disconnected</div>
 
-    room: <select ng-model="roomName" ng-options="x for x in getRoomNames()"></select>
-
-    <form ng-submit="sendMessage()">
-      <input type="text" ng-model="messageText" placeholder="your message">
-      <input type="submit" value="send">
+    <form ng-submit="makeNewRoom()">
+      room:
+      <select ng-model="roomName" ng-options="x for x in getRoomNames()">
+        <option value="">-- new --</option>
+      </select>
+      <input type="text" ng-model="newRoomNameText" placeholder="room name" ng-show="!roomName">
     </form>
 
-    <div ng-if='getMessagesInSelectedRoom()'>
-      <label>{{getMessagesInSelectedRoom().length}} messages</label>
-      <ul>
-        <li ng-repeat='message in getMessagesInSelectedRoom()'>{{message.body}}</li>
-      </ul>
+    <div ng-show="roomName">
+      <form ng-submit="sendMessage()">
+        <input type="text" ng-model="messageText" placeholder="your message">
+        <input type="submit" value="send">
+      </form>
+
+      <div ng-if='getMessagesInSelectedRoom()'>
+        <label>{{getMessagesInSelectedRoom().length}} messages</label>
+        <ul>
+          <li ng-repeat='message in getMessagesInSelectedRoom()'>{{message.body}}</li>
+        </ul>
+      </div>
     </div>
 
   </div>
