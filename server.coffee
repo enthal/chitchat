@@ -1,5 +1,8 @@
 #!/usr/bin/env coffee
 
+PORT = +process.env.PORT || 1337
+
+
 model = do ->
   # redis schema:
   #   chitchat:rooms = (SADD) set of room names
@@ -29,7 +32,7 @@ model = do ->
 
 # socket.io service
 do ->
-  io   = require('socket.io').listen(1338).set('log level', 1)
+  io   = require('socket.io').listen(PORT+1).set('log level', 1)
 
   model.withRoomCount (n) -> console.log "starting with #{n} rooms"
 
@@ -52,6 +55,6 @@ do ->
   app = express()
   app.use express.logger()
   app.use express.static(__dirname + "/public")
-  app.listen 1337
+  app.listen PORT
 
-  console.log 'Server running at http://127.0.0.1:1337/'
+  console.log "Server running at http://127.0.0.1:#{PORT}/"

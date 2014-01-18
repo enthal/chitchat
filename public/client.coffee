@@ -3,8 +3,8 @@ model =
 
 angular.module('chitchat', [])
 
-.run( ($rootScope, socketIo) ->
-  socketIo(':1338')
+.run( ($rootScope, $location, socketIo) ->
+  socketIo(":#{$location.port()+1}")
   .on('connect',    -> $rootScope.isConnected = true)
   .on('disconnect', -> $rootScope.isConnected = false)
   .on('messages', (roomsByName) ->
