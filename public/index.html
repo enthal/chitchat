@@ -27,8 +27,12 @@
         <input type="submit" value="send">
       </form>
 
-      <div ng-if='getMessagesInSelectedRoom()'>
-        <label>{{getMessagesInSelectedRoom().length}} messages</label>
+      <div>
+        <ng-pluralize count="getMessagesInSelectedRoom().length"
+              when="{ '0':     'The room is empty',
+                      'one':   '1 message',
+                      'other': '{} messages'    }">
+        </ng-pluralize>
         <ul>
           <li ng-repeat='message in getMessagesInSelectedRoom()'>{{message.body}}</li>
         </ul>
