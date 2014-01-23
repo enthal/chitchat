@@ -46,21 +46,26 @@ model = do ->
 
 
 # express app http service
-do ->
+httpServer = do ->
   express = require 'express'
 
   app = express()
+  httpServer = require("http").createServer app
+
   app.use express.logger()
   app.use express.static(__dirname + "/public")
-  app.listen PORT
+
+  httpServer.listen PORT
 
   console.log "Server running at http://127.0.0.1:#{PORT}/"
+
+  httpServer
 
 
 
 # socket.io service
 do ->
-  io   = require('socket.io').listen(PORT+1).set('log level', 1)
+  io   = require('socket.io').listen(httpServer).set('log level', 1)
 
   model.withRoomCount (n) -> console.log "starting with #{n} rooms"
 
