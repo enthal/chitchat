@@ -45,6 +45,19 @@ model = do ->
 
 
 
+# express app http service
+do ->
+  express = require 'express'
+
+  app = express()
+  app.use express.logger()
+  app.use express.static(__dirname + "/public")
+  app.listen PORT
+
+  console.log "Server running at http://127.0.0.1:#{PORT}/"
+
+
+
 # socket.io service
 do ->
   io   = require('socket.io').listen(PORT+1).set('log level', 1)
@@ -60,20 +73,7 @@ do ->
     socket.on 'message', (message) ->
       console.log message
       model.acceptMessage message
-      # don't emit here; wait untl message moves through redis pubsub channel
+      # don't emit here; wait until message moves through redis pubsub channel
 
   model.onRedisMessage (message) ->
     io.sockets.emit 'message', message
-
-
-
-# express app http service
-do ->
-  express = require 'express'
-
-  app = express()
-  app.use express.logger()
-  app.use express.static(__dirname + "/public")
-  app.listen PORT
-
-  console.log "Server running at http://127.0.0.1:#{PORT}/"
