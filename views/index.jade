@@ -1,0 +1,43 @@
+doctype html
+
+html
+  head
+    script(src='http://coffeescript.org/extras/coffee-script.js')
+    script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.js')
+    script(src='https://s3-us-west-2.amazonaws.com/change-ds-tj/socket.io/socket.io.js')
+
+    script(src='client.coffee', type='text/coffeescript')
+
+
+  body(ng-app='chitchat')
+    h1 chitchat in jade
+
+    div(ng-controller='ChitChat', ng-cloak='ng-cloak')
+
+      div(ng-if=' isConnected') :-) connected
+      div(ng-if='!isConnected') :-( disconnected
+
+      form(ng-submit='makeNewRoom()')
+        | room:
+        select(ng-model='roomName', ng-options='x for x in getRoomNames()')
+          option(value='') -- new --
+        input(type='text', ng-model='newRoomNameText', placeholder='room name', ng-show='!roomName')
+
+      div(ng-show='roomName')
+        form(ng-submit='sendMessage()')
+          input(type='text', ng-model='messageText', placeholder='your message')
+          input(type='submit', value='send', ng-disabled='!messageText')
+        div
+          ng-pluralize(
+              count='getMessagesInSelectedRoom().length',
+              when='{ "0": "The room is empty", "one": "1 message", "other": "{} messages"}' )
+          ul
+            li(ng-repeat='message in getMessagesInSelectedRoom()') {{message.body}}
+
+
+
+  // allow coffeescript to convert before angular bootstraps
+  script(type='text/coffeescript').
+    angular.resumeBootstrap()
+  script.
+    window.name = 'NG_DEFER_BOOTSTRAP!'

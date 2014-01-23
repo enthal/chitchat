@@ -16,6 +16,7 @@
     "coffee-script": "~1.6",
     "socket.io": "0.9.16",
     "express": "3.x",
+    "jade": "1.1.5",
     "redis": "0.10.x"
   }
 }
