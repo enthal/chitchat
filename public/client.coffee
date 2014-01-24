@@ -8,7 +8,7 @@ angular.module('chitchat', [])
   .on('connect',    -> $rootScope.isConnected = true)
   .on('disconnect', -> $rootScope.isConnected = false)
   .on('messages', (roomsByName) ->
-    console.log('roomsByName', roomsByName)
+    console.log 'roomsByName', roomsByName
     model.roomsByName = roomsByName
   )
   .on('message', (message) ->

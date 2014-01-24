@@ -8,16 +8,16 @@ model = do ->
   #   chitchat:rooms = (SADD) set of room names
   #   chitchat:room:<roomName> = (RPUSH) list of message body texts
 
-  redis = require("redis")
+  redis = require 'redis'
   onRedisMessage = null
 
   do ->
-    clientPubSub = redis.createClient()
-    clientPubSub.on 'message', (channel, message) ->
+    clientSubcr = redis.createClient()
+    clientSubcr.on 'message', (channel, message) ->
       console.log "message from redis subscription on channel [#{channel}] : #{message}"
       return unless channel is 'chitchat:messages'
       onRedisMessage JSON.parse message
-    clientPubSub.subscribe 'chitchat:messages'
+    clientSubcr.subscribe 'chitchat:messages'
 
   client = redis.createClient()
 
