@@ -20,6 +20,7 @@ model = do ->
     clientSubcr.subscribe 'chitchat:messages'
 
   client = redis.createClient()
+  usersById = {}
 
   withRoomCount: (fn) ->
     client.scard 'chitchat:rooms', (e,x)->fn x
@@ -43,6 +44,15 @@ model = do ->
   onRedisMessage: (fn) ->
     onRedisMessage = fn
 
+  withUserForId: (userId, fn) ->
+    console.log 'withUserForId', (x for x of usersById).length, usersById[userId]
+    fn(null, usersById[userId] or false)
+
+  withUserForIdUpdatingProfile: (userId, profile, fn) ->
+    console.log 'withUserForIdUpdatingProfile', (x for x of usersById).length, usersById[userId]
+    profile.id ?= userId
+    fn(null, usersById[userId] ?= profile)
+
 
 
 # express app http service
@@ -57,6 +67,29 @@ httpServer = do ->
   app.set 'view engine', 'jade'
   app.locals.pretty = true
   app.use express.static __dirname + '/public'
+  app.use express.cookieParser()
+
+  RedisStore = require('connect-redis')(express)
+  app.use express.session store: new RedisStore, secret: 'who knows me?'
+
+  passport = require 'passport'
+  app.use passport.initialize()
+  app.use passport.session()
+  passport.serializeUser (user, done) -> done null, user.id
+  passport.deserializeUser (id, done) -> model.withUserForId id, (e, user) -> done e, user
+
+  app.get '/auth/google',        passport.authenticate 'google'
+  app.get '/auth/google/return', passport.authenticate 'google',
+    successRedirect: '/'
+    failureRedirect: '/login'
+  GoogleStrategy = require('passport-google').Strategy
+  passport.use new GoogleStrategy
+    returnURL: "http://127.0.0.1:#{PORT}/auth/google/return"    # TODO: what host?
+    realm:     "http://127.0.0.1:#{PORT}/"                      # TODO: what host?
+  , (identifier, profile, done) ->
+    console.log 'GoogleStrategy', identifier, profile
+    model.withUserForIdUpdatingProfile identifier, profile, (e, user) -> done e, user
+
   app.get '/', (req, res) -> res.render 'index'
 
   httpServer.listen PORT

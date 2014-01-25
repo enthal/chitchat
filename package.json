@@ -14,9 +14,13 @@
 
   "dependencies": {
     "coffee-script": "~1.6",
-    "socket.io": "0.9.16",
+    "socket.io": "0.9.x",
     "express": "3.x",
-    "jade": "1.1.5",
+    "jade": "1.1.x",
+    "passport": "0.1.x",
+    "passport.socketio": "2.2.x",
+    "passport-google": "0.3.x",
+    "connect-redis":"1.4.6",
     "redis": "0.10.x"
   }
 }
