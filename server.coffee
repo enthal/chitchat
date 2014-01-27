@@ -63,7 +63,7 @@ model = do ->
 
 
 # express app http service
-httpServer = do ->
+[express, httpServer, sessionConfig] = do ->
   express = require 'express'
 
   app = express()
@@ -77,7 +77,11 @@ httpServer = do ->
   app.use express.cookieParser()
 
   RedisStore = require('connect-redis')(express)
-  app.use express.session store: new RedisStore, secret: 'who knows me?'
+  sessionConfig =
+    store: new RedisStore
+    key: 'express.sid'
+    secret: 'who knows me?'    # Not very secret in a public github repo!
+  app.use express.session sessionConfig
 
   passport = require 'passport'
   app.use passport.initialize()
@@ -103,7 +107,7 @@ httpServer = do ->
 
   console.log "Server running at http://127.0.0.1:#{PORT}/"
 
-  httpServer
+  [express, httpServer, sessionConfig]
 
 
 
@@ -111,7 +115,16 @@ httpServer = do ->
 do ->
   io = require('socket.io').listen(httpServer).set('log level', 1)
 
-  model.withRoomCount (n) -> console.log "starting with #{n} rooms"
+  sessionConfig.cookieParser = express.cookieParser
+  sessionConfig.success = (data, accept) ->
+    console.log 'successful connection to socket.io on behalf of:', data.user?.displayName#, data
+    accept null, true
+  sessionConfig.fail = (data, message, error, accept) ->
+    throw new Error(message)  if error
+    console.log 'failed connection to socket.io:', message
+    accept null, false
+
+  io.set 'authorization', require('passport.socketio').authorize sessionConfig
 
   io.sockets.on 'connection', (socket) ->
     console.log 'connection!', socket.id
@@ -126,3 +139,7 @@ do ->
 
   model.onRedisMessage (message) ->
     io.sockets.emit 'message', message
+
+
+
+model.withRoomCount (n) -> console.log "starting with #{n} rooms"
