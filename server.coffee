@@ -20,7 +20,6 @@ model = do ->
     clientSubcr.subscribe 'chitchat:messages'
 
   client = redis.createClient()
-  usersById = {}
 
   withRoomCount: (fn) ->
     client.scard 'chitchat:rooms', (e,x)->fn x
@@ -45,13 +44,21 @@ model = do ->
     onRedisMessage = fn
 
   withUserForId: (userId, fn) ->
-    console.log 'withUserForId', (x for x of usersById).length, usersById[userId]
-    fn(null, usersById[userId] or false)
+    client.hget 'chitchat:users', userId, (e, userJson) ->
+      return fn(e) if e
+      console.log 'withUserForId', userJson
+      fn e, (if userJson then JSON.parse userJson else false)
 
   withUserForIdUpdatingProfile: (userId, profile, fn) ->
-    console.log 'withUserForIdUpdatingProfile', (x for x of usersById).length, usersById[userId]
-    profile.id ?= userId
-    fn(null, usersById[userId] ?= profile)
+    client.hget 'chitchat:users', userId, (e, userJson) ->
+      return fn(e) if e
+      console.log 'withUserForIdUpdatingProfile', userJson
+      if userJson
+        fn e, JSON.parse userJson
+      else
+        profile.id ?= userId
+        client.hset 'chitchat:users', userId, JSON.stringify(profile), (e) ->
+          fn e, profile
 
 
 
