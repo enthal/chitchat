@@ -1,7 +1,8 @@
 #!/usr/bin/env coffee
 
+HOST =  process.env.HOST || '127.0.0.1'
 PORT = +process.env.PORT || 1337
-
+BASE_URL = "http://#{HOST}:#{PORT}"
 
 model = do ->
   # redis schema:
@@ -98,8 +99,8 @@ model = do ->
     failureRedirect: '/'
   GoogleStrategy = require('passport-google').Strategy
   passport.use new GoogleStrategy
-    returnURL: "http://127.0.0.1:#{PORT}/auth/google/return"    # TODO: what host?
-    realm:     "http://127.0.0.1:#{PORT}/"                      # TODO: what host?
+    returnURL: "#{BASE_URL}/auth/google/return"    # TODO: what host?
+    realm:     "#{BASE_URL}/"                      # TODO: what host?
   , (identifier, profile, done) ->
     console.log 'GoogleStrategy', identifier, profile
     model.withUserForIdUpdatingProfile identifier, profile, (e, user) -> done e, user
@@ -108,7 +109,7 @@ model = do ->
 
   httpServer.listen PORT
 
-  console.log "Server running at http://127.0.0.1:#{PORT}/"
+  console.log "Server running at #{BASE_URL}/"
 
   [express, httpServer, sessionConfig]
 
