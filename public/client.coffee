@@ -5,7 +5,7 @@ angular.module('chitchat', [])
 
 .run( ($rootScope, $location, socketIo) ->
   socketIo()
-  .on('connect',    -> $rootScope.isConnected = true)
+  .on('connect',    -> $rootScope.isConnected = $rootScope.isAuthenticated = true)
   .on('disconnect', -> $rootScope.isConnected = false)
   .on('messages', (roomsByName) ->
     console.log 'roomsByName', roomsByName
@@ -25,11 +25,10 @@ angular.module('chitchat', [])
     k for k of model.roomsByName
 
   $scope.getMessagesInSelectedRoom = ->
-    model.roomsByName[$scope.roomName]?.messages or 0
+    model.roomsByName[$scope.roomName]?.messages
 
   $scope.makeNewRoom = ->
     name = $scope.newRoomNameText
-    console.log 'makeNewRoom', name
     model.roomsByName[$scope.roomName = name] ?= name: name
 
   $scope.sendMessage = ->

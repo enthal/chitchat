@@ -89,10 +89,13 @@ model = do ->
   passport.serializeUser (user, done) -> done null, user.id
   passport.deserializeUser (id, done) -> model.withUserForId id, (e, user) -> done e, user
 
+  app.get '/auth/logout', (req, res) ->
+    req.logout()
+    res.redirect '/'
   app.get '/auth/google',        passport.authenticate 'google'
   app.get '/auth/google/return', passport.authenticate 'google',
     successRedirect: '/'
-    failureRedirect: '/login'
+    failureRedirect: '/'
   GoogleStrategy = require('passport-google').Strategy
   passport.use new GoogleStrategy
     returnURL: "http://127.0.0.1:#{PORT}/auth/google/return"    # TODO: what host?
@@ -127,7 +130,7 @@ do ->
   io.set 'authorization', require('passport.socketio').authorize sessionConfig
 
   io.sockets.on 'connection', (socket) ->
-    console.log 'connection!', socket.id
+    console.log 'connection!', socket.id#, socket
 
     model.withAllRoomsWithMessages (all) ->
       socket.emit 'messages', all
