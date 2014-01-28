@@ -125,8 +125,7 @@ do ->
     console.log 'successful connection to socket.io on behalf of:', data.user?.displayName#, data
     accept null, true
   sessionConfig.fail = (data, message, error, accept) ->
-    throw new Error(message)  if error
-    console.log 'failed connection to socket.io:', message
+    console.log (if error then 'ERROR' else 'failed'), 'connection to socket.io:', message
     accept null, false
 
   io.set 'authorization', require('passport.socketio').authorize sessionConfig
