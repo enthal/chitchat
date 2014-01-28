@@ -18,6 +18,8 @@ html
         a(href="/auth/google") Sign In with Google
 
       div(ng-show=' isAuthenticated')
+        div Signed in as:
+          b  {{me.displayName}}
 
         div(ng-show='!isConnected')
           | :-( disconnected

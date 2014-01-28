@@ -5,8 +5,12 @@ angular.module('chitchat', [])
 
 .run( ($rootScope, $location, socketIo) ->
   socketIo()
-  .on('connect',    -> $rootScope.isConnected = $rootScope.isAuthenticated = true)
+  .on('connect',    -> $rootScope.isConnected = true)
   .on('disconnect', -> $rootScope.isConnected = false)
+  .on('authenticatedAs', (me) ->
+    $rootScope.me = me
+    $rootScope.isAuthenticated = true
+  )
   .on('messages', (roomsByName) ->
     console.log 'roomsByName', roomsByName
     model.roomsByName = roomsByName
@@ -36,6 +40,9 @@ angular.module('chitchat', [])
     socketIo.emit 'message',
       room: $scope.roomName,
       body: $scope.messageText
+      user:
+        id:          $scope.$root.me.id
+        displayName: $scope.$root.me.displayName
     $scope.messageText = ''
 )
 

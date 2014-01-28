@@ -130,7 +130,13 @@ do ->
   io.set 'authorization', require('passport.socketio').authorize sessionConfig
 
   io.sockets.on 'connection', (socket) ->
-    console.log 'connection!', socket.id#, socket
+    user = socket.handshake?.user
+    console.log 'connection!', socket.id, user
+    unless user?.logged_in
+      console.log 'bail out of connection: user not logged_in!'
+      return
+
+    socket.emit 'authenticatedAs', user
 
     model.withAllRoomsWithMessages (all) ->
       socket.emit 'messages', all
