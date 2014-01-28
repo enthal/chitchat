@@ -1,6 +1,6 @@
 #!/usr/bin/env coffee
 
-HOST =  process.env.HOST || '127.0.0.1'
+HOST =  process.env.HOST || process.env.HOSTNAME || '127.0.0.1'
 PORT = +process.env.PORT || 1337
 BASE_URL = "http://#{HOST}:#{PORT}"
 
