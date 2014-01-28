@@ -7,7 +7,7 @@ BASE_URL = "http://#{HOST}:#{PORT}"
 model = do ->
   # redis schema:
   #   chitchat:rooms = (SADD) set of room names
-  #   chitchat:room:<roomName> = (RPUSH) list of message body texts
+  #   chitchat:room:messages:<roomName> = (RPUSH) list of messages
 
   redis = require 'redis'
   onRedisMessage = null
@@ -32,14 +32,15 @@ model = do ->
       left = roomNames.length
       for roomName in roomNames
         do (roomName) ->
-          client.lrange 'chitchat:room:'+roomName, 0, -1, (e, messages) ->
-            roomsByName[roomName] = messages: ((body:m) for m in messages)
+          client.lrange 'chitchat:room:messages:'+roomName, 0, -1, (e, messageJsons) ->
+            roomsByName[roomName] = messages: (JSON.parse m for m in messageJsons)
             fn roomsByName  unless --left
 
   acceptMessage: (message) ->
-    client.sadd  'chitchat:rooms', message.room
-    client.rpush 'chitchat:room:'+ message.room, message.body
-    client.publish 'chitchat:messages', JSON.stringify message
+    messageJson = JSON.stringify message
+    client.sadd    'chitchat:rooms',         message.room
+    client.rpush   'chitchat:room:messages:'+message.room, messageJson
+    client.publish 'chitchat:messages',                    messageJson
 
   onRedisMessage: (fn) ->
     onRedisMessage = fn

@@ -41,7 +41,11 @@ html
                 count='getMessagesInSelectedRoom().length',
                 when='{ "0": "The room is empty", "one": "1 message", "other": "{} messages"}' )
             ul
-              li(ng-repeat='message in getMessagesInSelectedRoom()') {{message.body}}
+              li(ng-repeat='message in getMessagesInSelectedRoom()')
+                span(ng-show='message.user')
+                  i {{message.user.displayName}}
+                  |  —
+                |  {{message.body}}
 
 
 
